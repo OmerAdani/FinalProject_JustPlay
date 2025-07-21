@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ניהול כרטיסי שחקן</title>
+
+    <!-- Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        background-color: #cce7ff;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      .header {
+        background-color: white;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .header h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #333;
+        text-align: center;
+        width: 100%;
+        font-weight: bold;
+      }
+
+      .back-button {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        cursor: pointer;
+      }
+
+      .container {
+        background-color: white;
+        margin: 30px auto;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        width: 95%;
+        max-height: 75vh;
+        overflow: auto;
+      }
+
+      table.dataTable thead th {
+        background-color: #007bff;
+        color: white;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      table.dataTable tbody td {
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      .btn-show {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+        padding: 4px 10px;
+        border-radius: 6px;
+      }
+
+      .btn-delete {
+        background-color: #dc3545;
+        color: white;
+        font-weight: bold;
+        padding: 4px 10px;
+        border-radius: 6px;
+      }
+
+      .btn-show:hover {
+        background-color: #0056b3;
+      }
+
+      .btn-delete:hover {
+        background-color: #b02a37;
+      }
+
+      .dataTables_wrapper .dataTables_paginate .paginate_button {
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        margin: 0 2px;
+        padding: 5px 10px;
+        color: black !important;
+        border: none !important;
+      }
+
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background-color: #007bff !important;
+        color: white !important;
+      }
+
+      .preview {
+        margin-top: 30px;
+        display: none;
+        text-align: center;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        color: #333;
+        font-size: 16px;
+        font-weight: 600;
+        padding-right: 4px;
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          gap: 10px;
+          text-align: center;
+          padding: 15px;
+        }
+
+        .header h2 {
+          font-size: 20px;
+        }
+
+        .back-button {
+          width: 36px;
+          height: 36px;
+          font-size: 16px;
+        }
+
+        .container {
+          padding: 20px 10px;
+          margin: 20px auto;
+          width: 100%;
+        }
+
+        #playerCardsTable_wrapper {
+          overflow-x: auto;
+        }
+
+        table.dataTable {
+          width: 100% !important;
+          min-width: 800px; /* מאפשר גלילה אופקית במקום קפיצה */
+        }
+
+        .preview iframe,
+        .preview img {
+          max-width: 100%;
+          height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h2>ניהול כרטיסי שחקן</h2>
+      <button class="back-button" onclick="goHome()">🏠</button>
+    </div>
+
+    <div class="container">
+      <div style="margin-bottom: 30px">
+        <img
+          src="../images/logo.jpg"
+          alt="JUST PLAY"
+          style="width: 180px; display: block; margin: 0 auto"
+        />
+      </div>
+      <table id="playerCardsTable" class="display table table-bordered">
+        <thead>
+          <tr>
+            <th>מזהה כרטיס</th>
+            <th>ת.ז שחקן</th>
+            <th>שם שחקן</th>
+            <th>קבוצה</th>
+            <th>שם באנגלית</th>
+            <th>כרטיס מוכן?</th>
+            <th>בדיקה רפואית</th>
+            <th>צילום תעודה</th>
+            <th>תמונת פספורט</th>
+            <th>אישור ביטוח</th>
+            <th>🗑️</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="preview" id="filePreview">
+        <button class="btn btn-danger mb-3" onclick="closePreview()">
+          סגור תצוגה
+        </button>
+        <div id="previewContent"></div>
+      </div>
+    </div>
+
+    <!-- Modal אישור מחיקה -->
+    <div
+      class="modal fade"
+      id="confirmDeleteModal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+          <div class="modal-body p-4">
+            <h5 class="mb-3">האם אתה בטוח שברצונך למחוק את כרטיס השחקן הזה?</h5>
+            <div class="d-flex justify-content-center gap-3">
+              <button
+                type="button"
+                class="btn btn-outline-primary"
+                data-bs-dismiss="modal"
+              >
+                ביטול
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="confirmDeleteBtn"
+              >
+                אישור
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+    <script>
+      let selectedCardId = null;
+
+      function goHome() {
+        window.location.href = "home.html";
+      }
+
+      function closePreview() {
+        $("#filePreview").hide();
+        $("#previewContent").html("");
+      }
+
+      function viewFile(base64Data) {
+        let content;
+        if (base64Data.startsWith("data:application/pdf")) {
+          content = `<iframe src="${base64Data}" width="100%" height="600px"></iframe>`;
+        } else if (base64Data.startsWith("data:image/")) {
+          content = `<img src="${base64Data}" style="max-width:100%; max-height:600px;" />`;
+        } else {
+          content = "<p>פורמט קובץ לא נתמך</p>";
+        }
+        $("#previewContent").html(content);
+        $("#filePreview").show();
+        document
+          .getElementById("filePreview")
+          .scrollIntoView({ behavior: "smooth" });
+      }
+
+      function deleteCard(cardId) {
+        selectedCardId = cardId;
+        const modal = new bootstrap.Modal(
+          document.getElementById("confirmDeleteModal")
+        );
+        modal.show();
+      }
+
+      document
+        .getElementById("confirmDeleteBtn")
+        .addEventListener("click", function () {
+          if (!selectedCardId) return;
+
+          $.ajax({
+            type: "DELETE",
+            url: `https://proj.ruppin.ac.il/igroup8/test2/tar1/api/PlayerCard/DeletePlayerCard?cardID=${selectedCardId}`,
+            success: function () {
+              const modal = bootstrap.Modal.getInstance(
+                document.getElementById("confirmDeleteModal")
+              );
+              modal.hide();
+              alert("הכרטיס נמחק בהצלחה");
+              location.reload();
+            },
+            error: function (err) {
+              console.error("שגיאה במחיקה:", err);
+              alert("שגיאה במחיקת הכרטיס");
+            },
+          });
+        });
+
+      $(document).ready(function () {
+        const coachId = localStorage.getItem("loggedInUserId");
+        if (!coachId) {
+          alert("לא נמצא מזהה מאמן.");
+          return;
+        }
+
+        $.get(
+          `https://proj.ruppin.ac.il/igroup8/test2/tar1/api/PlayerCard/byCoach/${coachId}`,
+          function (data) {
+            const tableData = data.map((card) => {
+              const allFieldsFilled =
+                card.medical_Examination &&
+                card.id_Document &&
+                card.passport_Photo &&
+                card.insurance_Confirmation;
+              const yesNo = allFieldsFilled ? "כן" : "לא";
+
+              function fileButton(file) {
+                return file
+                  ? `<button class='btn btn-show btn-sm' onclick='viewFile("${file}")'>הצג</button>`
+                  : "-";
+              }
+
+              return {
+                card_ID: card.card_ID,
+                player_ID: card.player_ID,
+                player_Name: card.player_Name,
+                team_Name: card.team_Name,
+                english_Name: card.english_Name,
+                is_there_a_player_card: yesNo,
+                medical: fileButton(card.medical_Examination),
+                id_doc: fileButton(card.id_Document),
+                passport: fileButton(card.passport_Photo),
+                insurance: fileButton(card.insurance_Confirmation),
+                delete: `<button class='btn btn-delete btn-sm' onclick='deleteCard(${card.card_ID})'>מחק</button>`,
+              };
+            });
+
+            $("#playerCardsTable").DataTable({
+              data: tableData,
+              columns: [
+                { data: "card_ID" },
+                { data: "player_ID" },
+                { data: "player_Name" },
+                { data: "team_Name" },
+                { data: "english_Name" },
+                { data: "is_there_a_player_card" },
+                { data: "medical" },
+                { data: "id_doc" },
+                { data: "passport" },
+                { data: "insurance" },
+                { data: "delete" },
+              ],
+              language: {
+                search: "חיפוש:",
+                lengthMenu: "הצג _MENU_ רשומות",
+                info: "מציג _START_ עד _END_ מתוך _TOTAL_ רשומות",
+                paginate: {
+                  first: "ראשון",
+                  previous: "הקודם",
+                  next: "הבא",
+                  last: "אחרון",
+                },
+              },
+            });
+          }
+        );
+      });
+    </script>
+  </body>
+</html>

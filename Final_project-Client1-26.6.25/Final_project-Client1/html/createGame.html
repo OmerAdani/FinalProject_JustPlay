@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>יצירת משחק</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../js/ajaxcalls.js"></script>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #cce7ff;
+      }
+      .header {
+        background-color: white;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+      .header h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #333;
+      }
+      .home-button {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+      .container {
+        background-color: white;
+        margin: 40px auto;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        width: 90%;
+        max-width: 600px;
+        box-sizing: border-box;
+        text-align: center;
+      }
+      label {
+        display: block;
+        margin: 10px 0 5px;
+        font-weight: bold;
+        text-align: right;
+        color: #333;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #bbb;
+        border-radius: 8px;
+        font-size: 15px;
+      }
+      button[type="submit"] {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      button[type="submit"]:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+      }
+      #customAlert {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-size: 16px;
+        display: none;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      }
+      #customAlert.error {
+        background-color: #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h2>יצירת משחק</h2>
+      <button class="home-button" onclick="goHome()">🏠</button>
+    </div>
+
+    <div class="container">
+      <div style="margin-bottom: 30px">
+        <img
+          src="../images/logo.jpg"
+          alt="JUST PLAY"
+          style="width: 180px; display: block; margin: 0 auto"
+        />
+      </div>
+      <form id="gameForm">
+        <label for="gameDate">תאריך משחק:</label>
+        <input type="datetime-local" id="gameDate" required />
+
+        <label for="matchweek">מחזור:</label>
+        <input type="number" id="matchweek" required />
+
+        <label for="team">קבוצה:</label>
+        <select id="team" required>
+          <option value="">בחר קבוצה</option>
+          <option>ילדים ג</option>
+          <option>ילדים ב</option>
+          <option>ילדים א</option>
+          <option>נערים ג</option>
+          <option>נערים ב</option>
+          <option>נערים א</option>
+          <option>נוער</option>
+        </select>
+
+        <label for="opposing_team">קבוצה יריבה:</label>
+        <input type="text" id="opposing_team" required />
+
+        <label for="game_Result">תוצאה:</label>
+        <select id="game_Result" required>
+          <option value="">בחר תוצאה</option>
+          <option value="ניצחון">ניצחון</option>
+          <option value="תיקו">תיקו</option>
+          <option value="הפסד">הפסד</option>
+        </select>
+
+        <label for="team_Scoring">שערים שלנו:</label>
+        <input type="number" id="team_Scoring" required />
+
+        <label for="goal_conceded">שערים שספגנו:</label>
+        <input type="number" id="goal_conceded" required />
+
+        <button type="submit">יצירת משחק</button>
+      </form>
+    </div>
+
+    <div id="customAlert"></div>
+
+    <script>
+      function goHome() {
+        window.location.href = "home.html";
+      }
+
+      function showAlert(message, isError = false) {
+        const alertBox = document.getElementById("customAlert");
+        alertBox.textContent = message;
+        alertBox.classList.toggle("error", isError);
+        alertBox.style.display = "block";
+        alertBox.style.opacity = "1";
+        setTimeout(() => {
+          alertBox.style.opacity = "0";
+          setTimeout(() => {
+            alertBox.style.display = "none";
+          }, 300);
+        }, 3000);
+      }
+
+      $(document).ready(function () {
+        $("#gameForm").submit(function (e) {
+          e.preventDefault();
+
+          const gameData = {
+            gameID: 0,
+            gameDate: new Date($("#gameDate").val()).toISOString(),
+            matchweek: parseInt($("#matchweek").val()),
+            team: $("#team").val(),
+            opposing_team: $("#opposing_team").val(),
+            game_Result: $("#game_Result").val(),
+            team_Scoring: parseInt($("#team_Scoring").val()),
+            goal_conceded: parseInt($("#goal_conceded").val()),
+          };
+
+          // תנאי בדיקה לפי תוצאה
+          if (
+            gameData.game_Result === "ניצחון" &&
+            gameData.team_Scoring <= gameData.goal_conceded
+          ) {
+            return showAlert(
+              "בשביל ניצחון, חייבים להבקיע יותר ממה שספגנו",
+              true
+            );
+          }
+          if (
+            gameData.game_Result === "הפסד" &&
+            gameData.team_Scoring >= gameData.goal_conceded
+          ) {
+            return showAlert("בהפסד, צריך לספוג יותר ממה שהבקענו", true);
+          }
+          if (
+            gameData.game_Result === "תיקו" &&
+            gameData.team_Scoring !== gameData.goal_conceded
+          ) {
+            return showAlert("בתיקו, השערים חייבים להיות שווים", true);
+          }
+
+          ajaxCall(
+            "POST",
+            "https://proj.ruppin.ac.il/igroup8/test2/tar1/api/Game/postCreatGame",
+            JSON.stringify(gameData),
+            () => showAlert("✅ המשחק נוסף בהצלחה!"),
+            (err) => {
+              console.error("שגיאה בשליחה:", err);
+              showAlert("❌ שגיאה ביצירת המשחק", true);
+            }
+          );
+        });
+      });
+    </script>
+  </body>
+</html>

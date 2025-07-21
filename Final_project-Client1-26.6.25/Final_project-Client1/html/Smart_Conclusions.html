@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>תובנות שחקנים ממערכת GPT</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"
+    />
+
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #cce7ff;
+        margin: 0;
+        padding: 0;
+      }
+
+      .header {
+        background-color: white;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .header h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #333;
+      }
+
+      .container {
+        background-color: white;
+        margin: 30px auto;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        width: 95%;
+        overflow-x: auto;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 30px;
+        font-size: 15px;
+      }
+
+      table th,
+      table td {
+        text-align: center;
+        padding: 12px;
+        border: 1px solid #ddd;
+      }
+
+      table th {
+        background-color: #007baf;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      table tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 20px;
+        margin-top: -20px;
+      }
+
+      .dataTables_wrapper .dataTables_filter label {
+        margin-left: 8px;
+      }
+
+      .dataTables_wrapper .dataTables_length label {
+        font-weight: bold;
+      }
+
+      .dataTables_wrapper .dataTables_length select {
+        margin: 0 4px;
+      }
+
+      .btn-return {
+        background-color: #0dcaf0;
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 16px;
+      }
+
+      .back-button {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.3s ease;
+      }
+
+      .back-button:hover {
+        background-color: #5a6268;
+      }
+
+      #output {
+        margin-top: 15px;
+        font-size: 15px;
+        background-color: #e2f0ff;
+        border: 1px solid #a8cfff;
+        padding: 12px 18px;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        color: #004085;
+        direction: rtl;
+        line-height: 1.5;
+      }
+
+      .alert {
+        margin-top: 20px;
+      }
+
+      @media (max-width: 600px) {
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+          width: 88%;
+          padding: 30px;
+        }
+
+        .header h2 {
+          font-size: 20px;
+          margin-bottom: 10px;
+        }
+
+        .button-group {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .container {
+          padding: 16px;
+          margin: 20px auto;
+        }
+
+        table {
+          font-size: 13px;
+        }
+
+        .btn-return {
+          width: 100%;
+          text-align: center;
+        }
+
+        .back-button {
+          align-self: center;
+          margin-top: 10px;
+        }
+
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_length {
+          text-align: right;
+          font-size: 14px;
+        }
+
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+          font-size: 13px;
+        }
+
+        .dataTables_wrapper .dataTables_filter label {
+          margin: 0px 170px 0px 0px;
+        }
+
+        .table-wrapper {
+          width: 100%;
+          overflow-x: auto;
+        }
+
+        .table-wrapper table {
+          min-width: 600px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h2>תובנות והמלצות חכמות על שחקנים</h2>
+      <div class="button-group">
+        <button class="btn-return" onclick="goToGameData()">
+          חזרה לנתוני משחקים
+        </button>
+        <button class="back-button" onclick="goHome()" title="חזור לדף הבית">
+          🏠
+        </button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="loadingMessage">טוען נתונים...</div>
+      <div class="table-wrapper">
+        <table
+          id="insightsTable"
+          class="display table table-bordered"
+          style="display: none"
+        >
+          <thead>
+            <tr>
+              <th>ת.ז שחקן</th>
+              <th>שם שחקן</th>
+              <th>תפקיד</th>
+              <th>תובנה</th>
+              <th>המלצה</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+      function goHome() {
+        window.location.href = "home.html";
+      }
+
+      function goToGameData() {
+        window.location.href = "gameData.html";
+      }
+
+      function exportToExcel() {
+        const table = document.getElementById("insightsTable");
+        let csv = [];
+        for (let row of table.rows) {
+          let rowData = [];
+          for (let cell of row.cells) {
+            rowData.push(cell.innerText);
+          }
+          csv.push(rowData.join(","));
+        }
+        const csvContent = "data:text/csv;charset=utf-8," + csv.join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "insights.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      function ajaxCall(method, api, data, successCB, errorCB) {
+        $.ajax({
+          type: method,
+          url: api,
+          data: data,
+          cache: false,
+          contentType: "application/json",
+          dataType: "json",
+          success: successCB,
+          error: errorCB,
+        });
+      }
+
+      function loadInsights() {
+        const coachId = localStorage.getItem("loggedInUserId");
+        if (!coachId) {
+          alert("לא נמצא מזהה מאמן.");
+          return;
+        }
+
+        ajaxCall(
+          "GET",
+          `https://proj.ruppin.ac.il/igroup8/test2/tar1/api/Game_Data/Get_Game_Data_chatGPT/${coachId}`,
+          null,
+          function (response) {
+            let parsed;
+            try {
+              parsed = JSON.parse(response.chatgpt_response);
+            } catch (e) {
+              $(`#loadingMessage`).text("שגיאה בפענוח התשובה מהמערכת");
+              return;
+            }
+
+            if (!parsed || parsed.length === 0) {
+              $(`#loadingMessage`).text("אין מידע על שחקנים.");
+              return;
+            }
+
+            $(`#loadingMessage`).hide();
+            $(`#insightsTable`).show();
+
+            $("#insightsTable").DataTable({
+              data: parsed,
+              columns: [
+                { data: "player_id" },
+                { data: "player_name" },
+                { data: "position" },
+                { data: "comment" },
+                { data: "suggestion" },
+              ],
+              language: {
+                search: "חיפוש:",
+                lengthMenu: "הצג _MENU_ רשומות",
+                info: "מציג _START_ עד _END_ מתוך _TOTAL_ רשומות",
+                paginate: {
+                  first: "ראשון",
+                  previous: "הקודם",
+                  next: "הבא",
+                  last: "אחרון",
+                },
+              },
+            });
+          },
+          function (err) {
+            $(`#loadingMessage`).text("אירעה שגיאה בטעינת התובנות.");
+            console.error(err);
+          }
+        );
+      }
+
+      $(document).ready(function () {
+        loadInsights();
+      });
+    </script>
+  </body>
+</html>

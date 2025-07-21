@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>צפייה בתשלומים</title>
+    <link
+      href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        background-color: #d0e9ff;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .header {
+        background-color: white;
+        padding: 20px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        position: relative;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .home-button {
+        position: absolute;
+        top: 15px;
+        left: 20px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .container {
+        background-color: white;
+        margin: 40px auto;
+        padding: 40px;
+        border-radius: 16px;
+        width: 95%;
+        max-width: 1200px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      .filter-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 30px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      #filterPaid {
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 15px;
+        border: 1px solid #ccc;
+        min-width: 150px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      table th,
+      table td {
+        padding: 14px 10px;
+        text-align: center;
+        border: 1px solid #ccc;
+        font-size: 15px;
+      }
+
+      table th {
+        background-color: #007bff;
+        color: white;
+        text-align: center !important;
+      }
+
+      table td {
+        background-color: white;
+      }
+
+      tr:hover {
+        background-color: #eef5ff;
+      }
+
+      .btn-update {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .btn-update:hover {
+        background-color: #0056b3;
+      }
+
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+
+      .dataTables_wrapper .dataTables_filter {
+        text-align: left;
+      }
+
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate {
+        margin-top: 20px;
+        font-size: 14px;
+      }
+
+      #paymentTable {
+        margin-top: 30px;
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          font-size: 20px;
+          padding: 15px;
+        }
+
+        .home-button {
+          top: 10px;
+          left: 10px;
+          width: 36px;
+          height: 36px;
+          font-size: 16px;
+        }
+
+        .container {
+          width: 100% !important;
+          max-width: 100% !important;
+          padding: 20px 12px !important;
+          margin: 20px auto !important;
+          border-radius: 0;
+          box-shadow: none;
+        }
+
+        .filter-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+          font-size: 16px;
+        }
+
+        #filterPaid {
+          width: 100%;
+          font-size: 14px;
+        }
+
+        .dataTables_wrapper {
+          overflow-x: auto;
+        }
+
+        table {
+          min-width: 800px;
+        }
+
+        .btn-update {
+          font-size: 13px;
+          padding: 6px 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      צפייה בתשלומים
+      <button class="home-button" onclick="goHome()" title="חזרה לדף הבית">
+        🏠
+      </button>
+    </div>
+
+    <div class="container">
+      <div class="filter-header">
+        <label for="filterPaid">סינון לפי סטטוס תשלום:</label>
+        <select id="filterPaid">
+          <option value="">הצג הכל</option>
+          <option value="✔️">שולם</option>
+          <option value="❌">לא שולם</option>
+        </select>
+      </div>
+
+      <table id="paymentTable" class="display"></table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+      function goHome() {
+        window.location.href = "home.html";
+      }
+
+      let table;
+
+      function loadPayments() {
+        fetch(
+          "https://proj.ruppin.ac.il/igroup8/test2/tar1/api/Payment/GetPaymentList"
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if ($.fn.dataTable.isDataTable("#paymentTable")) {
+              table.clear().rows.add(data).draw();
+            } else {
+              table = $("#paymentTable").DataTable({
+                data,
+                columns: [
+                  { data: "payment_ID", title: "תשלום" },
+                  { data: "player_ID", title: "מספר שחקן" },
+                  { data: "player_Name", title: "שם שחקן" },
+                  { data: "payment_Method", title: "שיטה" },
+                  { data: "number_of_payments", title: "מס' תשלומים" },
+                  { data: "number_of_months_to_pay", title: "מס' חודשים" },
+                  { data: "total_Payment", title: 'סה"כ' },
+                  {
+                    data: "is_Paid",
+                    title: "שולם",
+                    render: (d) => (d ? "✔️" : "❌"),
+                  },
+                  {
+                    data: null,
+                    title: "עריכה",
+                    render: function (data, type, row) {
+                      const params = new URLSearchParams({
+                        payment_ID: row.payment_ID,
+                        player_ID: row.player_ID,
+                        player_Name: row.player_Name,
+                        payment_Method: row.payment_Method,
+                        number_of_payments: row.number_of_payments,
+                        number_of_months_to_pay: row.number_of_months_to_pay,
+                        total_Payment: row.total_Payment,
+                        is_Paid: row.is_Paid,
+                      }).toString();
+                      return `<a href="editPayments.html?${params}" class="btn-update">✏️ עריכה</a>`;
+                    },
+                  },
+                ],
+                pageLength: 5,
+                language: {
+                  paginate: {
+                    first: "ראשון",
+                    previous: "הקודם",
+                    next: "הבא",
+                    last: "אחרון",
+                  },
+                  lengthMenu: "הצג _MENU_ תשלומים",
+                  info: "מציג _START_ עד _END_ מתוך _TOTAL_",
+                  search: "חיפוש:",
+                  zeroRecords: "לא נמצאו תשלומים",
+                },
+              });
+            }
+
+            // ✅ פילטור לפי שולם / לא שולם
+            $("#filterPaid").on("change", function () {
+              const val = $(this).val();
+              table.rows().every(function () {
+                const data = this.data();
+                const isPaid = data.is_Paid;
+
+                if (
+                  (val === "✔️" && isPaid) ||
+                  (val === "❌" && !isPaid) ||
+                  val === ""
+                ) {
+                  $(this.node()).show();
+                } else {
+                  $(this.node()).hide();
+                }
+              });
+            });
+          })
+          .catch(() => alert("שגיאה בטעינת התשלומים"));
+      }
+
+      document.addEventListener("DOMContentLoaded", loadPayments);
+    </script>
+  </body>
+</html>

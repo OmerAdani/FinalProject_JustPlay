@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>הוספת תשלום</title>
+    <style>
+      body {
+        margin: 0;
+        background-color: #d0e9ff;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .header {
+        background-color: white;
+        padding: 20px 30px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      .home-button {
+        position: absolute;
+        top: 15px;
+        left: 20px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .container {
+        background-color: white;
+        margin: 40px auto;
+        padding: 40px;
+        border-radius: 16px;
+        width: 95%;
+        max-width: 500px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        width: 160px;
+        display: block;
+        margin: 0 auto 30px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: bold;
+        text-align: right;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 15px;
+      }
+
+      button[type="submit"] {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      button[type="submit"]:hover {
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+      }
+
+      #customAlert {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 14px 24px;
+        border-radius: 12px;
+        display: none;
+        font-weight: bold;
+        z-index: 9999;
+      }
+
+      #customAlert.error {
+        background-color: #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      הוספת תשלום
+      <button class="home-button" onclick="goHome()" title="חזרה לדף הבית">
+        🏠
+      </button>
+    </div>
+
+    <div class="container">
+      <img src="../images/logo.jpg" alt="Just Play Logo" class="logo" />
+
+      <form id="addPaymentForm">
+        <label for="player_id">מספר שחקן:</label>
+        <input type="number" id="player_id" required />
+
+        <label for="player_name">שם שחקן:</label>
+        <input type="text" id="player_name" required />
+
+        <label for="payment_method">שיטת תשלום:</label>
+        <select id="payment_method" required>
+          <option value="אשראי">אשראי</option>
+          <option value="צ'קים">צ'קים</option>
+          <option value="מזומן">מזומן</option>
+        </select>
+
+        <label for="num_payments">מספר תשלומים:</label>
+        <input type="number" id="num_payments" required />
+
+        <label for="months">מספר חודשים:</label>
+        <input type="number" id="months" required />
+
+        <label for="total">סה"כ לתשלום:</label>
+        <input type="number" id="total" step="0.01" required />
+
+        <label for="is_paid">האם שולם?</label>
+        <select id="is_paid" required>
+          <option value="true" selected>כן</option>
+          <option value="false">לא</option>
+        </select>
+
+        <button type="submit">הוספת תשלום</button>
+      </form>
+    </div>
+
+    <div id="customAlert"></div>
+
+    <script>
+      function goHome() {
+        window.location.href = "home.html";
+      }
+
+      function showAlert(message, isError = false) {
+        const alertBox = document.getElementById("customAlert");
+        alertBox.textContent = message;
+        alertBox.className = isError ? "error" : "";
+        alertBox.style.display = "block";
+        setTimeout(() => {
+          alertBox.style.display = "none";
+        }, 3000);
+      }
+
+      document
+        .getElementById("addPaymentForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const isPaidValue =
+            document.getElementById("is_paid").value === "true";
+
+          const data = {
+            player_ID: parseInt(document.getElementById("player_id").value),
+            player_Name: document.getElementById("player_name").value,
+            payment_Method: document.getElementById("payment_method").value,
+            number_of_payments: parseInt(
+              document.getElementById("num_payments").value
+            ),
+            number_of_months_to_pay: parseInt(
+              document.getElementById("months").value
+            ),
+            total_Payment: parseFloat(document.getElementById("total").value),
+            is_Paid: isPaidValue,
+          };
+
+          fetch(
+            "https://proj.ruppin.ac.il/igroup8/test2/tar1/api/Payment/postCreatPayment",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            }
+          )
+            .then((res) => {
+              if (!res.ok) throw new Error();
+              showAlert("✅ התשלום נוסף בהצלחה!");
+              document.getElementById("addPaymentForm").reset();
+              document.getElementById("is_paid").value = "true";
+            })
+            .catch((err) => {
+              console.error("שגיאה:", err);
+              showAlert("❌ אירעה שגיאה. נסה שוב.", true);
+            });
+        });
+    </script>
+  </body>
+</html>

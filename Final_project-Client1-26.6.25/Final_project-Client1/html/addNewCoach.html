@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>הוספת מאמן</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../js/ajaxcalls.js"></script>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #cce7ff;
+        min-height: 100vh;
+      }
+
+      .header {
+        background-color: white;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .header h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #333;
+        width: 100%;
+        text-align: center;
+      }
+
+      .back-button {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.3s ease;
+      }
+
+      .back-button:hover {
+        background-color: #5a6268;
+      }
+
+      .container {
+        background-color: white;
+        padding: 40px;
+        margin: 40px auto;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        width: 90%;
+        max-width: 600px;
+        box-sizing: border-box;
+        text-align: center;
+      }
+
+      .logo {
+        max-width: 180px;
+        height: auto;
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin: 10px 0 5px;
+        font-weight: bold;
+        color: #333;
+        text-align: right;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #bbb;
+        border-radius: 8px;
+        font-size: 15px;
+      }
+
+      button[type="submit"] {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      button[type="submit"]:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+      }
+
+      /* הודעות הצלחה / שגיאה */
+      #customAlert {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-size: 16px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+        transition: opacity 0.3s ease;
+        display: none;
+      }
+
+      #customAlert.error {
+        background-color: #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h2>הוספת מאמן</h2>
+      <button class="back-button" onclick="goHome()" title="חזור לדף הבית">
+        🏠
+      </button>
+    </div>
+
+    <div class="container">
+      <div style="margin-bottom: 30px">
+        <img
+          src="../images/logo.jpg"
+          alt="JUST PLAY"
+          style="width: 180px; display: block; margin: 0 auto"
+        />
+      </div>
+      <form id="addCoachForm">
+        <label for="id_number">מספר ת"ז:</label>
+        <input
+          type="text"
+          id="id_number"
+          required
+          pattern="^\d{9}$"
+          title="יש להזין 9 ספרות בדיוק"
+        />
+
+        <label for="fullname">שם מלא:</label>
+        <input type="text" id="fullname" required />
+
+        <label for="gender">מין:</label>
+        <select id="gender" required>
+          <option value="">בחר מין</option>
+          <option value="M">זכר</option>
+          <option value="F">נקבה</option>
+        </select>
+
+        <label for="dob">תאריך לידה:</label>
+        <input type="date" id="dob" required />
+
+        <label for="email">אימייל:</label>
+        <input type="email" id="email" required />
+
+        <label for="password">סיסמה:</label>
+        <input
+          type="password"
+          id="password"
+          required
+          pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
+          title="הסיסמה חייבת לכלול לפחות אות קטנה, אות גדולה, מספר ואורך של 8 תווים לפחות"
+        />
+
+        <label for="phone">מספר טלפון:</label>
+        <input
+          type="tel"
+          id="phone"
+          required
+          pattern="^\d{10}$"
+          title="יש להזין מספר טלפון בן 10 ספרות"
+        />
+
+        <label for="is_manager">האם מנהל?</label>
+        <select id="is_manager" required>
+          <option value="">בחר</option>
+          <option value="true">כן</option>
+          <option value="false">לא</option>
+        </select>
+
+        <button type="submit">יצירת מאמן</button>
+      </form>
+    </div>
+
+    <div id="customAlert"></div>
+
+    <script>
+      function goHome() {
+        window.location.href = "home.html";
+      }
+
+      function showAlert(message, isError = false) {
+        const alertBox = document.getElementById("customAlert");
+        alertBox.textContent = message;
+        alertBox.classList.remove("error");
+        if (isError) alertBox.classList.add("error");
+
+        alertBox.style.display = "block";
+        alertBox.style.opacity = "1";
+
+        setTimeout(() => {
+          alertBox.style.opacity = "0";
+          setTimeout(() => {
+            alertBox.style.display = "none";
+          }, 300);
+        }, 3000);
+      }
+
+      $("#addCoachForm").submit(function (e) {
+        e.preventDefault();
+
+        const data = {
+          system_id: 0,
+          id: parseInt($("#id_number").val()),
+          name: $("#fullname").val(),
+          gender: $("#gender").val(),
+          date_Of_Birth: $("#dob").val(),
+          email: $("#email").val(),
+          role: "מאמן",
+          password: $("#password").val(),
+          phone_Number: $("#phone").val(),
+          is_Manager: $("#is_manager").val() === "true",
+          is_active: true,
+        };
+
+        console.log("JSON שנשלח:", JSON.stringify(data));
+
+        ajaxCall(
+          "POST",
+          "https://proj.ruppin.ac.il/igroup8/test2/tar1/api/Coach/postCreatCoach",
+          JSON.stringify(data),
+          successCB,
+          errorCB
+        );
+
+        function successCB(response) {
+          showAlert("המאמן נוסף בהצלחה!");
+          setTimeout(() => (window.location.href = "home.html"), 1500);
+        }
+
+        function errorCB(err) {
+          console.error("שגיאה מהשרת:", err.responseText || err);
+          showAlert("אירעה שגיאה בעת ההוספה. נסה שוב.", true);
+        }
+      });
+    </script>
+  </body>
+</html>

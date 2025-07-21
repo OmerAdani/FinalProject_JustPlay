@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>דף הבית</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #cce7ff;
+      }
+
+      .header {
+        background-color: white;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      .page-title {
+        position: absolute;
+        right: 0;
+        left: 0;
+        text-align: center;
+        font-size: 24px;
+        color: #333;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .user-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .user-name {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .logout-btn {
+        background-color: #ff4d4d;
+        border: none;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+
+      .logout-btn:hover {
+        background-color: #e60000;
+      }
+
+      .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 30px;
+        padding: 40px;
+        max-width: 1000px;
+        margin: auto;
+      }
+
+      .grid-item {
+        background-color: white;
+        padding: 30px 20px;
+        border-radius: 16px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        text-decoration: none;
+        color: #333;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .grid-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        background-color: #f9f9f9;
+      }
+
+      @media (max-width: 600px) {
+        .page-title {
+          font-size: 20px;
+        }
+
+        .user-actions {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+          margin-bottom: 10px;
+        }
+
+        .logout-btn {
+          padding: 8px 12px;
+          font-size: 12px;
+        }
+
+        .user-name {
+          font-size: 14px;
+        }
+
+        .grid-item {
+          font-size: 16px;
+          padding: 20px 15px;
+        }
+
+        .grid-container {
+          padding: 20px 10px;
+          gap: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="user-actions">
+        <span class="user-name" id="username">שלום, משתמש</span>
+        <button class="logout-btn" onclick="logout()">התנתק</button>
+      </div>
+      <h2 class="page-title">דף הבית</h2>
+    </div>
+
+    <div class="grid-container">
+      <a
+        id="playerCardsLink"
+        class="grid-item"
+        href="./PlayerCard.html"
+        style="display: none"
+        >🧑‍💼 כרטיסי שחקן</a
+      >
+      <a id="uploadFilesLink" class="grid-item" href="./createPlayerCard.html"
+        >📤 העלאת קבצים ליצירת כרטיס שחקן</a
+      >
+      <a
+        id="messagesLink"
+        class="grid-item"
+        href="./messages.html"
+        style="display: none"
+        >💬 הודעות</a
+      >
+      <a
+        id="fieldManagementLink"
+        class="grid-item"
+        href="./fieldBooking.html"
+        style="display: none"
+        >📅 ניהול מגרשים</a
+      >
+      <a
+        id="gameDataLink"
+        class="grid-item"
+        href="./gameData.html"
+        style="display: none"
+        >ℹ️ נתוני משחקים</a
+      >
+      <a
+        id="paymentTrackingLink"
+        class="grid-item"
+        href="./viewPayments.html"
+        style="display: none"
+        >💰 מעקב תשלומים</a
+      >
+      <a
+        class="grid-item"
+        href="addPayments.html"
+        id="addPaymentBox"
+        style="display: none"
+        >➕ הוספת תשלום</a
+      >
+      <a
+        class="grid-item"
+        href="createGame.html"
+        id="addGameBox"
+        style="display: none"
+        >➕ הוספת משחק</a
+      >
+      <a
+        id="editGameBox"
+        class="grid-item"
+        href="./editGame.html"
+        style="display: none"
+        >📝 עריכת משחק</a
+      >
+      <a
+        class="grid-item"
+        href="addNewPlayer.html"
+        id="addPlayerBox"
+        style="display: none"
+        >➕ הוספת שחקן</a
+      >
+      <a
+        class="grid-item"
+        href="editPlayerDetails.html"
+        id="editPlayerBox"
+        style="display: none"
+        >📝 עריכת שחקן</a
+      >
+      <a
+        class="grid-item"
+        href="addNewCoach.html"
+        id="addCoachBox"
+        style="display: none"
+        >➕ הוספת מאמן</a
+      >
+
+      <a
+        class="grid-item"
+        href="editCoachDeatails.html"
+        id="editCoachBox"
+        style="display: none"
+        >📝 עריכת מאמן</a
+      >
+    </div>
+
+    <script>
+      const username = localStorage.getItem("loggedInUserName") || "משתמש";
+      document.getElementById("username").textContent = `שלום, ${username}`;
+
+      const role = localStorage.getItem("loggedInUserRole");
+      const isManager = localStorage.getItem("loggedInIsManager");
+
+      if (role === "מאמן") {
+        document.getElementById("addPlayerBox").style.display = "block";
+        document.getElementById("playerCardsLink").style.display = "block";
+        document.getElementById("fieldManagementLink").style.display = "block";
+        document.getElementById("gameDataLink").style.display = "block";
+        document.getElementById("editPlayerBox").style.display = "block";
+        document.getElementById("addGameBox").style.display = "block";
+        document.getElementById("editGameBox").style.display = "block";
+        document.getElementById("messagesLink").style.display = "block";
+      }
+
+      if (isManager === "true") {
+        document.getElementById("addCoachBox").style.display = "block";
+        document.getElementById("paymentTrackingLink").style.display = "block";
+        document.getElementById("editCoachBox").style.display = "block";
+        document.getElementById("editPlayerBox").style.display = "block";
+        document.getElementById("addGameBox").style.display = "block";
+        document.getElementById("addPaymentBox").style.display = "block";
+        document.getElementById("messagesLink").style.display = "block";
+        document.getElementById("addTeamBox").style.display = "block";
+        document.getElementById("editTeamBox").style.display = "block";
+      }
+
+      function logout() {
+        localStorage.clear();
+        window.location.href = "login.html";
+      }
+    </script>
+  </body>
+</html>

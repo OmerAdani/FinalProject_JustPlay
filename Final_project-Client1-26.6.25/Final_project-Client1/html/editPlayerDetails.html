@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>עריכת פרטי שחקן</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../js/ajaxcalls.js"></script>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #cce7ff;
+      }
+
+      .header {
+        background-color: white;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      .header h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #333;
+      }
+
+      .home-button {
+        position: absolute;
+        top: 10px;
+        left: 20px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        padding: 0;
+      }
+
+      .home-button:hover {
+        background-color: #5a6268;
+      }
+
+      .container {
+        background-color: white;
+        margin: 40px auto;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        width: 90%;
+        max-width: 600px;
+        box-sizing: border-box;
+        text-align: center;
+      }
+
+      label {
+        display: block;
+        margin: 10px 0 5px;
+        font-weight: bold;
+        color: #333;
+        text-align: right;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #bbb;
+        border-radius: 8px;
+        font-size: 15px;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      button[type="submit"] {
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        color: white;
+      }
+
+      button[type="submit"]:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+      }
+
+      #deleteBtn {
+        background: linear-gradient(90deg, #dc3545, #c82333);
+        color: white;
+      }
+
+      #deleteBtn:disabled {
+        background-color: #aaa;
+        cursor: not-allowed;
+      }
+
+      #customAlert {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-size: 16px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+        transition: opacity 0.3s ease;
+        font-family: inherit;
+        display: none;
+      }
+
+      #customAlert.error {
+        background-color: #dc3545;
+      }
+
+      /* Modal styles */
+      #confirmModal .modal-overlay {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+      }
+
+      #confirmModal .modal-content {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        z-index: 9999;
+        text-align: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 400px;
+      }
+
+      #confirmModal .modal-content p {
+        font-size: 18px;
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      .modal-buttons {
+        display: flex;
+        justify-content: space-around;
+      }
+
+      .btn-danger {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .btn-danger:hover {
+        background-color: #c82333;
+      }
+
+      .btn-cancel:hover {
+        background-color: #5a6268;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h2>עריכת פרטי שחקן</h2>
+      <button class="home-button" onclick="goHome()">🏠</button>
+    </div>
+
+    <div class="container">
+      <div style="margin-bottom: 30px">
+        <img
+          src="../images/logo.jpg"
+          alt="JUST PLAY"
+          style="width: 180px; display: block; margin: 0 auto"
+        />
+      </div>
+      <label for="playerSelect">בחר שחקן:</label>
+      <select id="playerSelect">
+        <option value="">-- בחר שחקן --</option>
+      </select>
+
+      <form id="editPlayerForm">
+        <label for="id_number">מספר ת"ז:</label>
+        <input type="text" id="id_number" pattern="^\d{9}$" required />
+
+        <label for="fullname">שם מלא:</label>
+        <input type="text" id="fullname" />
+
+        <label for="gender">מין:</label>
+        <select id="gender">
+          <option value="">בחר מין</option>
+          <option value="M">זכר</option>
+          <option value="F">נקבה</option>
+        </select>
+
+        <label for="dob">תאריך לידה:</label>
+        <input type="date" id="dob" />
+
+        <label for="email">אימייל:</label>
+        <input type="email" id="email" />
+
+        <label for="password">סיסמה:</label>
+        <input type="password" id="password" />
+
+        <label for="phone">מספר טלפון:</label>
+        <input type="tel" id="phone" />
+
+        <label for="position">עמדה:</label>
+        <input type="text" id="position" />
+
+        <label for="team">קבוצה:</label>
+        <select id="team">
+          <option value="">בחר קבוצה</option>
+          <option>ילדים ג</option>
+          <option>ילדים ב</option>
+          <option>ילדים א</option>
+          <option>נערים ג</option>
+          <option>נערים ב</option>
+          <option>נערים א</option>
+          <option>נוער</option>
+        </select>
+
+        <label for="isActive">פעיל?</label>
+        <select id="isActive">
+          <option value="true">כן</option>
+          <option value="false">לא</option>
+        </select>
+
+        <button type="submit">שמירת שינויים</button>
+        <button type="button" id="deleteBtn" disabled>מחיקת שחקן</button>
+      </form>
+    </div>
+
+    <div id="customAlert"></div>
+
+    <div id="confirmModal" style="display: none">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <p>האם אתה בטוח שברצונך למחוק את השחקן?</p>
+        <div class="modal-buttons">
+          <button id="confirmDeleteBtn" class="btn-danger">מחיקה</button>
+          <button id="cancelDeleteBtn" class="btn-cancel">ביטול</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function goHome() {
+        window.location.href = "home.html";
+      }
+
+      function showAlert(message, isError = false) {
+        const alertBox = document.getElementById("customAlert");
+        alertBox.textContent = message;
+        alertBox.classList.toggle("error", isError);
+        alertBox.style.display = "block";
+        alertBox.style.opacity = "1";
+        setTimeout(() => {
+          alertBox.style.opacity = "0";
+          setTimeout(() => {
+            alertBox.style.display = "none";
+          }, 300);
+        }, 3000);
+      }
+
+      const coachId = localStorage.getItem("loggedInUserId");
+      let players = [];
+
+      $(document).ready(function () {
+        if (!coachId) return;
+
+        ajaxCall(
+          "GET",
+          `https://proj.ruppin.ac.il/igroup8/test2/tar1/api/Player/GetPlayerbyCoachID/${coachId}`,
+          null,
+          (response) => {
+            players = response;
+            response.forEach((p) => {
+              $("#playerSelect").append(
+                `<option value="${p.system_id}">${p.name}</option>`
+              );
+            });
+          },
+          (err) => showAlert("שגיאה בהבאת השחקנים", true)
+        );
+
+        $("#playerSelect").on("change", function () {
+          const selectedId = parseInt($(this).val());
+          const selectedPlayer = players.find(
+            (p) => p.system_id === selectedId
+          );
+          $("#deleteBtn").prop("disabled", !selectedPlayer);
+
+          if (!selectedPlayer) return;
+
+          $("#id_number").val(selectedPlayer.id);
+          $("#fullname").val(selectedPlayer.name);
+          $("#gender").val(selectedPlayer.gender);
+          $("#dob").val(selectedPlayer.date_Of_Birth?.split("T")[0]);
+          $("#email").val(selectedPlayer.email);
+          $("#password").val(selectedPlayer.password);
+          $("#phone").val(selectedPlayer.phone_Number);
+          $("#position").val(selectedPlayer.position);
+          $("#team").val(selectedPlayer.team);
+          $("#isActive").val(selectedPlayer.is_active ? "true" : "false");
+        });
+
+        $("#editPlayerForm").submit(function (e) {
+          e.preventDefault();
+          const data = {
+            id: parseInt($("#id_number").val()),
+            system_id: parseInt($("#playerSelect").val()),
+            role: "שחקן",
+            is_active: $("#isActive").val() === "true",
+          };
+
+          const optionalFields = [
+            { id: "fullname", key: "name" },
+            { id: "gender", key: "gender" },
+            { id: "dob", key: "date_Of_Birth" },
+            { id: "email", key: "email" },
+            { id: "password", key: "password" },
+            { id: "phone", key: "phone_Number", pattern: /^\d{10}$/ },
+            { id: "position", key: "position" },
+            { id: "team", key: "team" },
+          ];
+
+          optionalFields.forEach(({ id, key, pattern }) => {
+            const val = $(`#${id}`).val();
+            if (val && (!pattern || pattern.test(val))) {
+              data[key] = val;
+            }
+          });
+
+          ajaxCall(
+            "PUT",
+            "https://proj.ruppin.ac.il/igroup8/test2/tar1/api/Player/updateplayer",
+            JSON.stringify(data),
+            () => showAlert("✅ פרטי השחקן עודכנו בהצלחה!"),
+            (err) => {
+              console.error("שגיאה מהשרת:", err.responseText || err);
+              showAlert("❌ אירעה שגיאה בעדכון. נסה שוב.", true);
+            }
+          );
+        });
+
+        $("#deleteBtn").on("click", function () {
+          const playerId = $("#id_number").val();
+          if (!playerId) return;
+
+          $("#confirmModal").show();
+
+          $("#cancelDeleteBtn")
+            .off()
+            .on("click", function () {
+              $("#confirmModal").hide();
+            });
+
+          $("#confirmDeleteBtn")
+            .off()
+            .on("click", function () {
+              ajaxCall(
+                "DELETE",
+                `https://proj.ruppin.ac.il/igroup8/test2/tar1/api/Player/deletePlayer/${playerId}`,
+                null,
+                () => {
+                  showAlert("🗑️ השחקן נמחק בהצלחה!");
+                  $("#confirmModal").hide();
+                  setTimeout(() => location.reload(), 1500);
+                },
+                (err) => {
+                  console.error("שגיאה במחיקת השחקן:", err.responseText || err);
+                  showAlert("❌ שגיאה במחיקה", true);
+                  $("#confirmModal").hide();
+                }
+              );
+            });
+        });
+      });
+    </script>
+  </body>
+</html>
